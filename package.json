@@ -1,0 +1,17 @@
+{
+  "name": "memory-monitor",
+  "version": "1.0.0",
+  "description": "View and edit Claude Code memories across all projects",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "test": "npm run test:unit && npm run test:integration && npm run test:e2e",
+    "test:unit": "node --test test/unit.test.js",
+    "test:integration": "node --test test/integration.test.js",
+    "test:e2e": "playwright test",
+    "screenshots": "node scripts/screenshots.js"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.59.1"
+  }
+}
