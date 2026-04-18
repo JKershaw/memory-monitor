@@ -279,42 +279,48 @@ async function startServer() {
   let failed = false;
 
   try {
-    const context = await browser.newContext({
-      viewport: { width: 1280, height: 840 },
+    // ---------- Browse ---------------------------------------------------
+    // Content column is 1012px wide (56 padding + 900 max + 56 padding).
+    // Viewport of 1020 trims the right-hand whitespace tight to the content.
+    const browseContext = await browser.newContext({
+      viewport: { width: 1020, height: 800 },
       deviceScaleFactor: 2,
     });
-    const page = await context.newPage();
+    const browse = await browseContext.newPage();
+    await browse.goto(`http://localhost:${PORT}/`);
+    await browse.locator('.row').first().waitFor({ timeout: 8000 });
 
-    // ---------- Browse ---------------------------------------------------
-    await page.goto(`http://localhost:${PORT}/`);
-    await page.locator('.row').first().waitFor({ timeout: 8000 });
-
-    // Open the most visually interesting feedback drawer.
-    const showcase = page.locator('.row', { hasText: 'Prefer a single bundled PR' });
+    const showcase = browse.locator('.row', { hasText: 'Prefer a single bundled PR' });
     await showcase.click();
-    await page.locator('.drawer.open').first().waitFor();
-    // Give the CSS transition a moment to settle.
-    await page.waitForTimeout(400);
+    await browse.locator('.drawer.open').first().waitFor();
+    await browse.waitForTimeout(400);
 
-    await page.screenshot({
+    await browse.screenshot({
       path: path.join(OUT_DIR, 'browse.png'),
       fullPage: true,
     });
+    await browseContext.close();
     console.log('wrote browse.png');
 
     // ---------- Workspace ------------------------------------------------
-    await page.goto(`http://localhost:${PORT}/dashboard`);
-    await page.locator('.item').first().waitFor({ timeout: 8000 });
+    // Sidebar 340 + detail (28 pad + 680 max + 28 pad) = 1076. Viewport 1080.
+    const wsContext = await browser.newContext({
+      viewport: { width: 1080, height: 740 },
+      deviceScaleFactor: 2,
+    });
+    const ws = await wsContext.newPage();
+    await ws.goto(`http://localhost:${PORT}/dashboard`);
+    await ws.locator('.item').first().waitFor({ timeout: 8000 });
 
-    // Select a feedback memory so the detail pane shows callouts.
-    await page.locator('.item', { hasText: 'Integration tests hit a real database' }).click();
-    await page.locator('.d-title').waitFor();
-    await page.waitForTimeout(200);
+    await ws.locator('.item', { hasText: 'Integration tests hit a real database' }).click();
+    await ws.locator('.d-title').waitFor();
+    await ws.waitForTimeout(200);
 
-    await page.screenshot({
+    await ws.screenshot({
       path: path.join(OUT_DIR, 'workspace.png'),
       fullPage: false,
     });
+    await wsContext.close();
     console.log('wrote workspace.png');
   } catch (e) {
     failed = true;
