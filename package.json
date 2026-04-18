@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "View and edit Claude Code memories across all projects",
   "private": true,
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "start": "node server.js",
     "test": "npm run test:unit && npm run test:integration && npm run test:e2e",
